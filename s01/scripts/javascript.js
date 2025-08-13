@@ -60,6 +60,8 @@ class Escena extends Phaser.Scene {
         this.bola.setCollideWorldBounds(true);
         this.physics.world.setBoundsCollision(false, false, true, true);
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        this.sKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
 
         //Controles visuales para Jugador 1
         this.controlesVisuales(
@@ -94,9 +96,9 @@ class Escena extends Phaser.Scene {
         }
 
         //Movimiento 1er Jugador
-        if (this.cursors.up.isDown || this.mano1.getData('direccionVertical') === 1) {
+        if (this.wKey.isDown || this.mano1.getData('direccionVertical') === 1) {
             this.mano1.y = this.mano1.y - 5;
-        } else if (this.cursors.down.isDown || this.mano1.getData('direccionVertical') === -1) {
+        } else if (this.sKey.isDown || this.mano1.getData('direccionVertical') === -1) {
             this.mano1.y = this.mano1.y + 5
         }
 
