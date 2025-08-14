@@ -31,15 +31,15 @@ class Escena extends Phaser.Scene {
 
         //Primer Jugador
         this.mano1 = this.physics.add.sprite(70, 320, 'mano1');
-        this.mano1.body.immovable = true;
-        this.bola.setBounce(10);
+        this.mano1.setImmovable(true);
+        this.mano1.setBounce(10);
         this.mano1.setSize(60, 250);
         this.physics.add.collider(this.bola, this.mano1)
         this.mano1.setCollideWorldBounds(true);
 
         //Segundo Jugador
         this.mano2 = this.physics.add.sprite(882, 320, 'mano2');
-        this.mano2.body.immovable = true;
+        this.mano2.setImmovable(true);
         this.mano2.setBounce(10)
         this.mano2.setSize(60, 250);
         this.physics.add.collider(this.bola, this.mano2)
