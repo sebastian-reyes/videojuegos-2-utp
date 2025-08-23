@@ -1,17 +1,31 @@
 class Escena extends Phaser.Scene {
     preload() {
-        this.load.image('fondo', '../img/fondo.jpg');
-        this.load.spritesheet('bola', '../img/bola.png', {
+        this.load.image('fondo', '../assets/img/fondo.jpg');
+        this.load.spritesheet('bola', '../assets/img/bola.png', {
             frameWidth: 100,
             frameHeight: 100
         });
-        this.load.image('mano1', '../img/mano1.png');
-        this.load.image('mano2', '../img/mano2.png');
-        this.load.image('leftBtn', '../img/flecha.png');
+        this.load.image('mano1', '../assets/img/mano1.png');
+        this.load.image('mano2', '../assets/img/mano2.png');
+        this.load.image('leftBtn', '../assets/img/flecha.png');
+        this.load.audio('impact', '../assets/audio/impact.ogg');
+        this.load.audio('musica', '../assets/audio/musica_fondo.wav');
+        this.load.audio('explosion', '../assets/audio/explosion.wav');
     }
 
     create() {
 
+        this.impactSound = this.sound.add('impact', {
+            volume: 1
+        });
+        this.music = this.sound.add('musica', {
+            loop: true,
+            volume: 0.3
+        });
+        this.explosionSound = this.sound.add('explosion', {
+            volume: 0.5
+        });
+        this.music.play();
         this.input.addPointer();
         this.input.addPointer();
         this.input.addPointer();
@@ -28,22 +42,29 @@ class Escena extends Phaser.Scene {
             repeat: -1
         });
         this.bola.play('brillar')
+        this.impactSound = this.sound.add('impact');
 
         //Primer Jugador
         this.mano1 = this.physics.add.sprite(70, 320, 'mano1');
         this.mano1.setImmovable(true);
         this.mano1.setBounce(10);
         this.mano1.setSize(60, 250);
-        this.physics.add.collider(this.bola, this.mano1)
         this.mano1.setCollideWorldBounds(true);
+        this.physics.add.collider(this.bola, this.mano1, () => {
+            console.log('impacto desde mano 1');
+            this.impactSound.play();
+        });
 
         //Segundo Jugador
         this.mano2 = this.physics.add.sprite(882, 320, 'mano2');
         this.mano2.setImmovable(true);
         this.mano2.setBounce(10)
         this.mano2.setSize(60, 250);
-        this.physics.add.collider(this.bola, this.mano2)
         this.mano2.setCollideWorldBounds(true);
+        this.physics.add.collider(this.bola, this.mano2, () => {
+            console.log('impacto desde mano 2');
+            this.impactSound.play();
+        });
 
         const vel = 500;
         let anguloInicial = Math.random() * Math.PI / 2 + Math.PI / 4;
@@ -80,16 +101,24 @@ class Escena extends Phaser.Scene {
         this.alguienGano = false;
 
         this.pintarMarcador();
+
+        this.add.text(480, 590, 'Sebastián Reyes Quiroz', {
+            fontFamily: 'Arial',
+            fontSize: 32,
+            color: '#ffffff'
+        }).setOrigin(0.5, 0);
     }
 
     update() {
         this.bola.rotation += 0.1;
 
         if (this.bola.x < 0 && this.alguienGano === false) {
+            this.explosionSound.play();
             this.alguienGano = true;
             this.marcadorMano2.text = parseInt(this.marcadorMano2.text) + 1
             this.colocarPelota();
         } else if (this.bola.x > 960 && this.alguienGano === false) {
+            this.explosionSound.play();
             this.alguienGano = true;
             this.marcadorMano1.text = parseInt(this.marcadorMano1.text) + 1
             this.colocarPelota();
@@ -128,27 +157,13 @@ class Escena extends Phaser.Scene {
     colocarPelota() {
         const vel = 500;
         let anguloInicial = Math.random() * Math.PI / 2 + Math.PI / 4;
-
         const derechaOIzquierda = Math.floor(Math.random() * 2);
-        if (derechaOIzquierda === 1) anguloInicial = anguloInicial + Math.PI;
-
+        if (derechaOIzquierda === 1) anguloInicial += Math.PI;
         const vx = Math.sin(anguloInicial) * vel;
         const vy = Math.cos(anguloInicial) * vel;
 
-        this.bola = this.physics.add.sprite(480, 320, 'bola');
-        this.bola.play('brillar');
-
-        this.bola.setBounce(1);
-        this.physics.world.enable(this.bola)
-
-        this.bola.setCollideWorldBounds(true);
-        this.physics.world.setBoundsCollision(false, false, true, true);
-
-        this.bola.body.velocity.x = vx;
-        this.bola.body.velocity.y = vy;
-        this.physics.add.collider(this.bola, this.mano1);
-        this.physics.add.collider(this.bola, this.mano2);
-
+        this.bola.setPosition(480, 320);
+        this.bola.body.setVelocity(vx, vy);
         this.alguienGano = false;
     }
 
