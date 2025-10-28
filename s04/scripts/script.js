@@ -1,6 +1,14 @@
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
+// cargar sonidos
+const soundHit = new Audio('audio/hit.ogg');
+const soundCoin = new Audio('audio/coin.wav');
+soundHit.volume = 0.6;
+soundCoin.volume = 0.9;
+
+let lastHitTime = 0;
+
 //Rastreo de teclas
 let keys = {};
 document.addEventListener('keydown', (e) => keys[e.key] = true);
@@ -39,6 +47,18 @@ const levels = [
             { x: 550, y: 350, collected: false },
             { x: 300, y: 180, collected: false }
         ]
+    },
+    {
+        obstacles: [
+            { x: 150, y: 100, w: 300, h: 20 },
+            { x: 150, y: 200, w: 20, h: 150 },
+        ],
+        coins: [
+            { x: 100, y: 100, collected: false },
+            { x: 400, y: 300, collected: false },
+            { x: 550, y: 50, collected: false },
+            { x: 50, y: 350, collected: false }
+        ]
     }
 ];
 
@@ -67,13 +87,26 @@ function update() {
     if (keys['a']) player.x -= player.speed;
     if (keys['d']) player.x += player.speed;
 
+    // Mantener dentro de los límites del canvas
+    player.x = Math.max(0, Math.min(player.x, canvas.width - player.w));
+    player.y = Math.max(0, Math.min(player.y, canvas.height - player.h));
+
+
     for (let obs of level.obstacles) {
         if (rectsCollide(player, obs)) {
-            // Manejar colisión
+            const now = Date.now();
+            if (now - lastHitTime > 200) {
+                try { soundHit.currentTime = 0; soundHit.play(); } catch (e) { }
+                lastHitTime = now;
+            }
             if (keys['w']) player.y += player.speed;
             if (keys['s']) player.y -= player.speed;
             if (keys['a']) player.x += player.speed;
             if (keys['d']) player.x -= player.speed;
+
+            // Asegurarse de que el jugador sigue dentro de los límites del canvas después de la corrección
+            player.x = Math.max(0, Math.min(player.x, canvas.width - player.w));
+            player.y = Math.max(0, Math.min(player.y, canvas.height - player.h));
         }
     }
 
@@ -82,6 +115,7 @@ function update() {
             if (player.x < coin.x + 20 && player.x + player.w > coin.x &&
                 player.y < coin.y + 20 && player.y + player.h > coin.y) {
                 coin.collected = true;
+                try { soundCoin.currentTime = 0; soundCoin.play(); } catch (e) { }
             }
         }
     }
